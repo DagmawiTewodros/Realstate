@@ -57,9 +57,9 @@ export function StaffShell({ children }: { children: ReactNode }) {
             {t("staff")}
           </Link>
           <div className="row">
-            <span className="small muted">
+            <Link href="/staff/account" className="small muted">
               {user.name} · {e(`ROLE.${user.role}`)}
-            </span>
+            </Link>
             <LanguageSwitch signedIn />
             <button type="button" className="btn secondary small" onClick={() => void logout()}>
               {t("signOut")}
