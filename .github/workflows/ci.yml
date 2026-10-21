@@ -55,9 +55,9 @@ jobs:
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s
           --health-retries 20
+    # NODE_ENV is deliberately not set here: `next build` fails when NODE_ENV=development.
     env:
       SEED_PASSWORD: e2e-password-123
-      NODE_ENV: development
       AUTOMATION_MODE: direct
       SCHEDULER_ENABLED: "false"
       WEBHOOK_SIGNING_SECRET: e2e-webhook-secret-123
