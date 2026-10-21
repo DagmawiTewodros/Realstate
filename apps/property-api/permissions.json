@@ -1,0 +1,1138 @@
+[
+  {
+    "method": "GET",
+    "path": "/arrears",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/auth/accept-invitation",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/auth/change-password",
+    "access": "any",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/auth/logout",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/auth/me",
+    "access": "any",
+    "roles": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/auth/me",
+    "access": "any",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/automation/run",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/buildings",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/buildings/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/customers",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/customers",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/customers/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/customers/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/customers/:id/anonymise",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/customers/:id/consent",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/customers/:id/export",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "DELETE",
+    "path": "/documents/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/documents/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/files/documents/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/files/maintenance-photos/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/files/photos/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/health",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/health/ready",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/imports/:kind/commit",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/imports/:kind/dry-run",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/imports/:kind/preview",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/internal/messages/send",
+    "access": "internal",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/landlords",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/landlords",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/landlords/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/landlords/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/landlords/:id/invite",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/landlords/:landlordId/statements",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/landlords/:landlordId/statements/:month",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/landlords/:landlordId/statements/:month/pdf",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/landlords/:landlordId/statements/:month/reissue",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leads",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leads",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leads/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/leads/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leads/:id/activities",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leads/:id/assign",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leads/:id/status",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leads/:id/viewings",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leads/:id/viewings",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leads/overdue",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leases",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leases/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/leases/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/activate",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/end",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/invite-tenant",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leases/:id/ledger",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/payments",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/renew",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/leases/:id/terminate",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/leases/expiring",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/maintenance",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/maintenance",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/maintenance/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/maintenance/:id/assign",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/maintenance/:id/comments",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/maintenance/:id/photos",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/maintenance/:id/status",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/messages",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/messages/failed-events",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/optout/:token",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/optout/:token",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/payments/:id/receipt.pdf",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/payments/:id/slip",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/payments/:id/void",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "DELETE",
+    "path": "/photos/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/landlord/maintenance",
+    "access": "roles",
+    "roles": [
+      "LANDLORD"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/landlord/overview",
+    "access": "roles",
+    "roles": [
+      "LANDLORD"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/landlord/statements",
+    "access": "roles",
+    "roles": [
+      "LANDLORD"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/landlord/statements/:month",
+    "access": "roles",
+    "roles": [
+      "LANDLORD"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/landlord/statements/:month/pdf",
+    "access": "roles",
+    "roles": [
+      "LANDLORD"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/tenant/maintenance",
+    "access": "roles",
+    "roles": [
+      "TENANT"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/portal/tenant/maintenance",
+    "access": "roles",
+    "roles": [
+      "TENANT"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/portal/tenant/maintenance/:id/photos",
+    "access": "roles",
+    "roles": [
+      "TENANT"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/tenant/overview",
+    "access": "roles",
+    "roles": [
+      "TENANT"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/portal/tenant/payments/:id/receipt.pdf",
+    "access": "roles",
+    "roles": [
+      "TENANT"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/projects",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/projects",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/projects/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/projects/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/projects/:id/photos",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/public/documents/:id",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/featured",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/public/inquiries",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/photos/:id",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "POST",
+    "path": "/public/saved-searches/remove/:token",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/settings",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/sitemap",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/units",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/public/units/:id",
+    "access": "public",
+    "roles": []
+  },
+  {
+    "method": "GET",
+    "path": "/reports/arrears-aging",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/brokers",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/leads",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/leases-expiring",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/listings",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/maintenance",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/occupancy",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/reports/rent",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/saved-searches",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/saved-searches",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/saved-searches/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/settings/reminders",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "PUT",
+    "path": "/settings/reminders",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/settings/site",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "PUT",
+    "path": "/settings/site",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/staff",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/units",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/units",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/units/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/units/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/units/:id/documents",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/units/:id/maintenance-cost",
+    "access": "roles",
+    "roles": [
+      "OWNER",
+      "PROPERTY_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/units/:id/photos",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/units/:id/photos/order",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/units/:id/publish",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/units/:id/status",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "PROPERTY_MANAGER",
+      "SALES_MANAGER"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/users",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/users",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/users/:id",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/viewings/:id",
+    "access": "roles",
+    "roles": [
+      "BROKER",
+      "OWNER",
+      "SALES_MANAGER"
+    ]
+  }
+]
