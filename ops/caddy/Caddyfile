@@ -1,0 +1,20 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Each system is served on its own domain. Only the web apps are public; they proxy /api/* to their API.
+{$PROPERTY_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy property-web:3000
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
+{$GYM_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy gym-web:3000
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
+{$N8N_DOMAIN} {
+	reverse_proxy n8n:5678
+}

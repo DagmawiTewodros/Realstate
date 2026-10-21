@@ -1,0 +1,182 @@
+# Production-style stack for one server. Copy .env.example to .env, fill in the secrets, then:
+#   docker compose up -d --build
+# Database migrations run when each API starts (MIGRATE_ON_START); they are safe to run again.
+# See docs/OPERATIONS.md for seeding, backups, updates and the n8n automation profile.
+#
+# The two systems are separate: each has its own database, API, web app, secrets and volumes.
+# Only Caddy (HTTPS) and the optional n8n are shared.
+
+x-api-env: &api-env
+  NODE_ENV: production
+  COOKIE_SECURE: "true"
+  # Caddy, then the web app's /api proxy: the visitor's address is two hops back.
+  TRUST_PROXY_HOPS: "2"
+  AUTOMATION_MODE: ${AUTOMATION_MODE:-direct}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  ERROR_WEBHOOK_URL: ${ERROR_WEBHOOK_URL:-}
+  ALERT_TELEGRAM_CHAT_ID: ${ALERT_TELEGRAM_CHAT_ID:-}
+  MIGRATE_ON_START: "true"
+
+services:
+  # ---------------- System A: property ----------------
+  property-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: property
+      POSTGRES_USER: property
+      POSTGRES_PASSWORD: ${PROPERTY_DB_PASSWORD:?set PROPERTY_DB_PASSWORD in .env}
+    volumes:
+      - property-db:/var/lib/postgresql/data
+    networks: [property]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U property -d property"]
+      interval: 10s
+      retries: 10
+
+  property-api:
+    build:
+      context: .
+      dockerfile: ops/docker/api.Dockerfile
+      args: { APP: property-api }
+    image: platform/property-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      property-db: { condition: service_healthy }
+    environment:
+      <<: *api-env
+      PORT: "4000"
+      DATABASE_URL: postgres://property:${PROPERTY_DB_PASSWORD}@property-db:5432/property
+      SESSION_SECRET: ${PROPERTY_SESSION_SECRET:?set PROPERTY_SESSION_SECRET}
+      PUBLIC_WEB_URL: https://${PROPERTY_DOMAIN:?set PROPERTY_DOMAIN}
+      CORS_ORIGINS: https://${PROPERTY_DOMAIN}
+      WEBHOOK_SIGNING_SECRET: ${PROPERTY_WEBHOOK_SIGNING_SECRET:?set PROPERTY_WEBHOOK_SIGNING_SECRET}
+      INTERNAL_API_SECRET: ${PROPERTY_INTERNAL_API_SECRET:?set PROPERTY_INTERNAL_API_SECRET}
+      N8N_WEBHOOK_URL: ${PROPERTY_N8N_WEBHOOK_URL:-}
+      SMTP_FROM: ${PROPERTY_SMTP_FROM:-no-reply@example.com}
+      COMPANY_NAME: ${PROPERTY_COMPANY_NAME:-Real estate}
+      SEED_PASSWORD: ${SEED_PASSWORD:-}
+    volumes:
+      - property-files:/data/storage
+    networks: [property, edge]
+
+  property-web:
+    build:
+      context: .
+      dockerfile: ops/docker/web.Dockerfile
+      args: { APP: property-web, API_URL: "http://property-api:4000" }
+    image: platform/property-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on: [property-api]
+    environment:
+      PUBLIC_WEB_URL: https://${PROPERTY_DOMAIN}
+    networks: [property, edge]
+
+  # ---------------- System B: gym ----------------
+  gym-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gym
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: ${GYM_DB_PASSWORD:?set GYM_DB_PASSWORD in .env}
+    volumes:
+      - gym-db:/var/lib/postgresql/data
+    networks: [gym]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d gym"]
+      interval: 10s
+      retries: 10
+
+  gym-api:
+    build:
+      context: .
+      dockerfile: ops/docker/api.Dockerfile
+      args: { APP: gym-api }
+    image: platform/gym-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      gym-db: { condition: service_healthy }
+    environment:
+      <<: *api-env
+      PORT: "4001"
+      DATABASE_URL: postgres://gym:${GYM_DB_PASSWORD}@gym-db:5432/gym
+      SESSION_SECRET: ${GYM_SESSION_SECRET:?set GYM_SESSION_SECRET}
+      PUBLIC_WEB_URL: https://${GYM_DOMAIN:?set GYM_DOMAIN}
+      CORS_ORIGINS: https://${GYM_DOMAIN}
+      WEBHOOK_SIGNING_SECRET: ${GYM_WEBHOOK_SIGNING_SECRET:?set GYM_WEBHOOK_SIGNING_SECRET}
+      INTERNAL_API_SECRET: ${GYM_INTERNAL_API_SECRET:?set GYM_INTERNAL_API_SECRET}
+      N8N_WEBHOOK_URL: ${GYM_N8N_WEBHOOK_URL:-}
+      SMTP_FROM: ${GYM_SMTP_FROM:-no-reply@example.com}
+      COMPANY_NAME: ${GYM_COMPANY_NAME:-Gym}
+      SEED_PASSWORD: ${SEED_PASSWORD:-}
+    volumes:
+      - gym-files:/data/storage
+    networks: [gym, edge]
+
+  gym-web:
+    build:
+      context: .
+      dockerfile: ops/docker/web.Dockerfile
+      args: { APP: gym-web, API_URL: "http://gym-api:4001" }
+    image: platform/gym-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on: [gym-api]
+    networks: [gym, edge]
+
+  # ---------------- Shared ----------------
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      PROPERTY_DOMAIN: ${PROPERTY_DOMAIN}
+      GYM_DOMAIN: ${GYM_DOMAIN}
+      N8N_DOMAIN: ${N8N_DOMAIN:-n8n.localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./ops/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [property-web, gym-web]
+    networks: [edge]
+
+  # Optional workflow engine: `docker compose --profile automation up -d`, then import ops/n8n/*.json.
+  n8n:
+    image: n8nio/n8n:1.110.1
+    profiles: [automation]
+    restart: unless-stopped
+    environment:
+      N8N_HOST: ${N8N_DOMAIN:-n8n.localhost}
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://${N8N_DOMAIN:-n8n.localhost}/
+      GENERIC_TIMEZONE: Africa/Addis_Ababa
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-}
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      PROPERTY_API_URL: http://property-api:4000
+      PROPERTY_WEBHOOK_SIGNING_SECRET: ${PROPERTY_WEBHOOK_SIGNING_SECRET}
+      PROPERTY_INTERNAL_API_SECRET: ${PROPERTY_INTERNAL_API_SECRET}
+      GYM_API_URL: http://gym-api:4001
+      GYM_WEBHOOK_SIGNING_SECRET: ${GYM_WEBHOOK_SIGNING_SECRET}
+      GYM_INTERNAL_API_SECRET: ${GYM_INTERNAL_API_SECRET}
+    volumes:
+      - n8n-data:/home/node/.n8n
+    networks: [edge]
+
+volumes:
+  property-db:
+  property-files:
+  gym-db:
+  gym-files:
+  caddy-data:
+  caddy-config:
+  n8n-data:
+
+networks:
+  property:
+  gym:
+  edge:
