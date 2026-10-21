@@ -52,7 +52,7 @@
     "staff": "ሰራተኞች",
     "myDay": "የዛሬ ስራዬ",
     "pipeline": "የሽያጭ ሂደት",
-    "leads": "ደንበኞች ፍላጎት",
+    "leads": "ፈላጊ ደንበኞች",
     "customers": "ደንበኞች",
     "units": "ቤቶች",
     "projects": "ፕሮጀክቶች",
@@ -266,7 +266,7 @@
     "nextStepNote": "ቀጣይ እርምጃ"
   },
   "leads": {
-    "title": "ደንበኛ ፈላጊዎች",
+    "title": "ፈላጊ ደንበኞች",
     "pipeline": "የሽያጭ ሂደት",
     "new": "አዲስ ፈላጊ",
     "searchPlaceholder": "ስም ወይም ስልክ",
