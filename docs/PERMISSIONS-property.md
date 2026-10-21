@@ -33,6 +33,7 @@ Legend: ✓ allowed, blank denied (403). Public = no sign-in. Internal = n8n sha
 | POST | `/imports/:kind/commit` | Roles | ✓ | ✓ |  | ✓ |  |  |
 | POST | `/imports/:kind/dry-run` | Roles | ✓ | ✓ |  | ✓ |  |  |
 | POST | `/imports/:kind/preview` | Roles | ✓ | ✓ |  | ✓ |  |  |
+| POST | `/internal/events/messages` | Internal |  |  |  |  |  |  |
 | POST | `/internal/messages/send` | Internal |  |  |  |  |  |  |
 | GET | `/landlords` | Roles | ✓ | ✓ |  | ✓ |  |  |
 | POST | `/landlords` | Roles | ✓ |  |  | ✓ |  |  |

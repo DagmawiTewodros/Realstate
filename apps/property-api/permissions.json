@@ -238,6 +238,12 @@
   },
   {
     "method": "POST",
+    "path": "/internal/events/messages",
+    "access": "internal",
+    "roles": []
+  },
+  {
+    "method": "POST",
     "path": "/internal/messages/send",
     "access": "internal",
     "roles": []

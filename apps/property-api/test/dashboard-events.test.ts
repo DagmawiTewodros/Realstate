@@ -232,5 +232,18 @@ describe("Task 12: events and webhook outbox", () => {
       await t.dispatch();
       expect(t.telegram.sent).toHaveLength(1);
     });
+
+    it("lets an n8n workflow hand an event back for its standard messages, once", async () => {
+      await t.createUser("SALES_MANAGER", { telegramChatId: "2002", name: "Selam" });
+      const { agent } = await t.as("BROKER");
+      await agent.post("/leads").send({ source: "WALK_IN", customer: { name: "Kidus", phone: "0914000101" } }).expect(201);
+      const [event] = await t.db.select().from(outboxEvents).where(eq(outboxEvents.name, "lead.created.v1"));
+      const call = (id: string, secret = "test-internal-secret-123") => t.http().post("/internal/events/messages").set("x-internal-secret", secret).send({ id });
+      await call(event.id, "wrong-secret-value-123").expect(401);
+      await call("00000000-0000-4000-8000-000000000000").expect(404);
+      await call(event.id).expect(200, { handled: true });
+      await call(event.id).expect(200);
+      expect(t.telegram.sent.map((m) => m.to.telegramChatId)).toEqual(["2002"]);
+    });
   });
 });

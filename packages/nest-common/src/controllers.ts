@@ -4,7 +4,8 @@ import { z } from "zod";
 import { channelSchema, idSchema, MESSAGE_STATUSES, paginationSchema } from "@platform/shared";
 import { Internal, Public, Roles } from "./auth/decorators";
 import { zod } from "./zod.pipe";
-import { AppError } from "./errors";
+import { AppError, notFound } from "./errors";
+import { OutboxDispatcher } from "./outbox";
 import { ConsentService } from "./consent";
 import { MessageService } from "./messaging";
 import { ReminderLogService } from "./reminders";
@@ -43,13 +44,26 @@ const internalSendSchema = z.object({
   reminderKey: z.string().max(200).optional(),
 });
 
+const eventRefSchema = z.object({ id: idSchema });
+
 /** Called by n8n workflows. Protected by the INTERNAL_API_SECRET header, never by a user session. */
 @Controller("internal")
 export class InternalController {
   constructor(
     private readonly messages: MessageService,
     private readonly reminders: ReminderLogService,
+    private readonly dispatcher: OutboxDispatcher,
   ) {}
+
+  /** n8n mode: send the standard messages for an event the workflow received. */
+  @Post("events/messages")
+  @Internal()
+  @HttpCode(200)
+  async eventMessages(@Body(zod(eventRefSchema)) body: z.infer<typeof eventRefSchema>) {
+    const result = await this.dispatcher.runMessagingFor(body.id);
+    if (!result.handled) throw notFound("EVENT_NOT_FOUND", "No such event");
+    return result;
+  }
 
   @Post("messages/send")
   @Internal()

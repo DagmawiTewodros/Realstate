@@ -151,6 +151,18 @@ export class OutboxDispatcher implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  /**
+   * Used in n8n mode: a workflow hands an event back so the standard messages for it are sent by the API
+   * (the same rules as direct mode). Only events that really exist in the outbox are accepted, and each
+   * message is claimed per event and recipient by the rules, so a repeated call never sends twice.
+   */
+  async runMessagingFor(eventId: string): Promise<{ handled: boolean }> {
+    const [row] = await this.db.select().from(outboxEvents).where(eq(outboxEvents.id, eventId)).limit(1);
+    if (!row) return { handled: false };
+    await this.rules?.handleMessaging?.({ id: row.id, name: row.name, payload: row.payload as Record<string, unknown>, createdAt: row.createdAt });
+    return { handled: true };
+  }
+
   private async deliver(event: OutboxEvent): Promise<void> {
     switch (this.config.AUTOMATION_MODE) {
       case "off":
