@@ -37,7 +37,7 @@ export default tseslint.config(
     rules: {
       "no-restricted-imports": [
         "error",
-        { patterns: [{ group: ["**/property-api/**", "@platform/property-api*"], message: "System B must not import System A code." }] },
+        { patterns: [{ group: ["**/property-api/**", "**/property-web/**", "@platform/property-*"], message: "System B must not import System A code." }] },
       ],
     },
   },
@@ -46,7 +46,7 @@ export default tseslint.config(
     rules: {
       "no-restricted-imports": [
         "error",
-        { patterns: [{ group: ["**/gym-api/**", "@platform/gym-api*"], message: "System A must not import System B code." }] },
+        { patterns: [{ group: ["**/gym-api/**", "**/gym-web/**", "@platform/gym-*"], message: "System A must not import System B code." }] },
       ],
     },
   },

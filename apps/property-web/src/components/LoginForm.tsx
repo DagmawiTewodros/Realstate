@@ -24,7 +24,7 @@ export function LoginForm() {
       const res = await api<{ user: SessionUser }>("/auth/login", { method: "POST", json: { email: form.get("email"), password: form.get("password") } });
       setLocaleCookie(res.user.locale);
       const next = params.get("next");
-      router.replace(next && /^\/(?![\/\\])/.test(next) ? next : homeFor(res.user.role));
+      router.replace(next && /^\/(?![/\\])/.test(next) ? next : homeFor(res.user.role));
       router.refresh();
     } catch (err) {
       setBusy(false);

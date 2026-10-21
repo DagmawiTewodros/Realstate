@@ -20,7 +20,7 @@ if (missingInAm.length || missingInEn.length || empty.length) {
   if (empty.length) console.error(`Empty in am.json:\n  ${empty.join("\n  ")}`);
   process.exit(1);
 }
-console.log(`Translations OK: ${en.size} keys in both languages.`);
+console.warn(`Translations OK: ${en.size} keys in both languages.`);
 
 // Every literal key used in the code must exist. Translators are found from
 // `const t = useTranslations("ns")` or `await getTranslations("ns")`; template keys such as
@@ -62,4 +62,4 @@ if (problems.length) {
   console.error(`Keys used in the code but missing from en.json:\n  ${problems.join("\n  ")}`);
   process.exit(1);
 }
-console.log(`Translation keys used in ${files.length} source files all exist.`);
+console.warn(`Translation keys used in ${files.length} source files all exist.`);

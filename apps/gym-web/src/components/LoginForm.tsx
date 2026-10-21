@@ -25,7 +25,7 @@ export function LoginForm() {
       setLocaleCookie(res.user.locale);
       const next = params.get("next");
       // Only same-site paths are followed, so a crafted link cannot send people elsewhere.
-      router.replace(next && /^\/(?![\/\\])/.test(next) ? next : homeFor(res.user.role));
+      router.replace(next && /^\/(?![/\\])/.test(next) ? next : homeFor(res.user.role));
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) setError(err.status === 429 ? t("tooMany") : err.status === 401 || err.status === 400 ? t("invalid") : c("error"));
