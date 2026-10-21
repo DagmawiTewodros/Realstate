@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "System A: property platform API (CRM, listings, rentals, automation)",
+  "files": [
+    "dist",
+    "drizzle"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json && node --enable-source-maps dist/main.js",

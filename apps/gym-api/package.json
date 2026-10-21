@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "System B: gym management API (members, memberships, check-in, classes, messaging)",
+  "files": [
+    "dist",
+    "drizzle"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json && node --enable-source-maps dist/main.js",
