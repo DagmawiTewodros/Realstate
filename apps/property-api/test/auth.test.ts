@@ -81,6 +81,18 @@ describe("Task 01/03: health, sign-in and roles", () => {
     await agent.get("/auth/me").expect(401);
   });
 
+  it("lets the owner set a temporary password, which ends the user's sessions", async () => {
+    const { agent, user } = await t.as("BROKER");
+    const { agent: owner } = await t.as("OWNER");
+    await agent.post(`/users/${user.id}/password`).send({ password: "temporary-password-1" }).expect(403);
+    await owner.post(`/users/${user.id}/password`).send({ password: "short" }).expect(400);
+    await owner.post(`/users/${user.id}/password`).send({ password: "temporary-password-1" }).expect(200);
+    await agent.get("/auth/me").expect(401);
+    await t.http().post("/auth/login").send({ email: user.email, password: "temporary-password-1" }).expect(200);
+    const tenant = await t.createUser("TENANT");
+    await owner.post(`/users/${tenant.id}/password`).send({ password: "temporary-password-1" }).expect(400);
+  });
+
   it("changes a password only with the current one", async () => {
     const { agent, user } = await t.as("BROKER");
     await agent.post("/auth/change-password").send({ currentPassword: "nope", newPassword: "another-long-password" }).expect(400);

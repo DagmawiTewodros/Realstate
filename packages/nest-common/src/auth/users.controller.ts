@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, ParseUUIDPipe, Patch, Post } from "@nestjs/common";
+import { z } from "zod";
+import { passwordSchema } from "@platform/shared";
 import { asc, eq, sql } from "drizzle-orm";
 import { AppError, notFound } from "../errors";
 import { AuditService } from "../audit";
 import { DB, PLATFORM_OPTIONS } from "../tokens";
-import type { Database } from "../db";
+import type { Database, Executor } from "../db";
+import { zod } from "../zod.pipe";
 import type { PlatformOptions } from "../options";
 import { users } from "../schema";
 import { AuthService, toAuthUser } from "./auth.service";
@@ -24,6 +27,8 @@ interface UpdateUserBody {
   telegramChatId?: string | null;
   isActive?: boolean;
 }
+
+const resetPasswordSchema = z.object({ password: passwordSchema });
 
 /** Staff user management. Only the OWNER role exists in both systems and manages users. */
 @Controller("users")
@@ -63,6 +68,25 @@ export class UsersController {
       .returning();
     await this.audit.log({ userId: actor.id, action: "user.created", entityType: "user", entityId: row.id, metadata: { role: row.role } });
     return { user: { ...toAuthUser(row), isActive: row.isActive } };
+  }
+
+  /**
+   * The owner sets a new temporary password for a staff member who forgot theirs (there is no email reset).
+   * All of that user's sessions end, and the change is audited. Portal and member accounts are not changed here.
+   */
+  @Post(":id/password")
+  @HttpCode(200)
+  async resetPassword(@Param("id", ParseUUIDPipe) id: string, @Body(zod(resetPasswordSchema)) body: z.infer<typeof resetPasswordSchema>, @CurrentUser() actor: AuthUser) {
+    const [target] = await this.db.select().from(users).where(eq(users.id, id));
+    if (!target) throw notFound();
+    if (this.options.portalRoles.includes(target.role)) throw new AppError(400, "PORTAL_ROLE", "Portal accounts set their own password through an invitation");
+    const passwordHash = await this.auth.hashPassword(body.password);
+    await this.db.transaction(async (tx) => {
+      await tx.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, id));
+      await this.auth.endAllSessions(id, tx as unknown as Executor);
+      await this.audit.log({ userId: actor.id, action: "user.password_reset", entityType: "user", entityId: id }, tx as unknown as Executor);
+    });
+    return { ok: true };
   }
 
   @Patch(":id")

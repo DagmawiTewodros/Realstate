@@ -134,4 +134,5 @@ Legend: ✓ allowed, blank denied (403). Public = no sign-in. Internal = n8n sha
 | GET | `/users` | Roles | ✓ |  |  |  |  |  |
 | POST | `/users` | Roles | ✓ |  |  |  |  |  |
 | PATCH | `/users/:id` | Roles | ✓ |  |  |  |  |  |
+| POST | `/users/:id/password` | Roles | ✓ |  |  |  |  |  |
 | PATCH | `/viewings/:id` | Roles | ✓ | ✓ | ✓ |  |  |  |

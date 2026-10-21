@@ -1132,6 +1132,14 @@
     ]
   },
   {
+    "method": "POST",
+    "path": "/users/:id/password",
+    "access": "roles",
+    "roles": [
+      "OWNER"
+    ]
+  },
+  {
     "method": "PATCH",
     "path": "/viewings/:id",
     "access": "roles",

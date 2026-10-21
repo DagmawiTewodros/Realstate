@@ -8,7 +8,7 @@ import { CLOCK, DB, PLATFORM_OPTIONS } from "./tokens";
 import type { Clock } from "./clock";
 import type { Database, Executor } from "./db";
 import type { PlatformOptions } from "./options";
-import { invitations, users } from "./schema";
+import { invitations, sessions, users } from "./schema";
 import { toAuthUser } from "./auth/auth.service";
 import type { AuthUser } from "./auth/decorators";
 
@@ -32,8 +32,15 @@ export class InvitationService {
     if (!this.options.portalRoles.includes(input.role)) throw new Error(`Role ${input.role} is not a portal role`);
     if (!input.email) throw new AppError(400, "EMAIL_REQUIRED", "Add an email address first; it becomes the login name");
     const exec = tx ?? this.db;
-    const [existingUser] = await exec.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${input.email.toLowerCase()}`);
-    if (existingUser) throw new AppError(409, "EMAIL_IN_USE", "A login with this email already exists");
+    const [existingUser] = await exec
+      .select({ id: users.id, role: users.role, linkedEntityId: users.linkedEntityId })
+      .from(users)
+      .where(sql`lower(${users.email}) = ${input.email.toLowerCase()}`);
+    // Inviting the same person again is allowed: accepting it sets a new password (forgotten password).
+    // An email that belongs to anyone else (staff, or another portal record) cannot be used.
+    if (existingUser && (existingUser.role !== input.role || existingUser.linkedEntityId !== input.linkedEntityId)) {
+      throw new AppError(409, "EMAIL_IN_USE", "A login with this email already exists");
+    }
     const token = randomBytes(32).toString("base64url");
     const expiresAt = new Date(this.clock.now().getTime() + INVITATION_TTL_MS);
     await exec.insert(invitations).values({
@@ -56,8 +63,20 @@ export class InvitationService {
       if (!inv) throw new AppError(404, "INVITATION_NOT_FOUND", "This invitation link is not valid");
       if (inv.usedAt) throw new AppError(400, "INVITATION_USED", "This invitation link has already been used");
       if (inv.expiresAt.getTime() < this.clock.now().getTime()) throw new AppError(400, "INVITATION_EXPIRED", "This invitation link has expired; ask for a new one");
-      const [clash] = await tx.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${inv.email}`);
-      if (clash) throw new AppError(409, "EMAIL_IN_USE", "A login with this email already exists");
+      const passwordHash = await bcrypt.hash(password, this.options.bcryptRounds ?? 12);
+      const [existing] = await tx.select().from(users).where(sql`lower(${users.email}) = ${inv.email}`);
+      if (existing) {
+        // A new invitation for the same person is how a landlord, tenant or member recovers a forgotten password.
+        if (existing.role !== inv.role || existing.linkedEntityId !== inv.linkedEntityId) {
+          throw new AppError(409, "EMAIL_IN_USE", "A login with this email already exists");
+        }
+        if (!existing.isActive) throw new AppError(403, "ACCOUNT_DISABLED", "This account has been turned off; contact the office");
+        const [updated] = await tx.update(users).set({ passwordHash, updatedAt: this.clock.now() }).where(eq(users.id, existing.id)).returning();
+        await tx.delete(sessions).where(eq(sessions.userId, existing.id));
+        await tx.update(invitations).set({ usedAt: this.clock.now() }).where(eq(invitations.id, inv.id));
+        await this.audit.log({ userId: existing.id, action: "invitation.password_reset", entityType: "user", entityId: existing.id }, tx as unknown as Executor);
+        return toAuthUser(updated);
+      }
       const [user] = await tx
         .insert(users)
         .values({
@@ -66,7 +85,7 @@ export class InvitationService {
           role: inv.role,
           locale: inv.locale,
           linkedEntityId: inv.linkedEntityId,
-          passwordHash: await bcrypt.hash(password, this.options.bcryptRounds ?? 12),
+          passwordHash,
         })
         .returning();
       await tx.update(invitations).set({ usedAt: this.clock.now() }).where(eq(invitations.id, inv.id));

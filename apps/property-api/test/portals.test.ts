@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { auditLog, outboxEvents } from "@platform/nest-common";
+import { auditLog, outboxEvents, users } from "@platform/nest-common";
 import { maintenanceRequests } from "../src/db/schema";
 import { createTestApp, type Agent, type TestApp } from "./harness";
 import { makeProject, makeUnit } from "./fixtures";
@@ -139,14 +139,29 @@ describe("Task 17: portals and invitations", () => {
     await t.http().post("/auth/accept-invitation").send({ token: "x".repeat(40), password: "portal-password-1" }).expect(404);
   });
 
-  it("needs an email to invite, and an email cannot be used twice", async () => {
+  it("needs an email to invite, and an email cannot be used by someone else", async () => {
     const w = await world();
     const noEmail = (await w.pm.post("/landlords").send({ name: "No Email" }).expect(201)).body.landlord;
     const res = await w.pm.post(`/landlords/${noEmail.id}/invite`).expect(400);
     expect(res.body.code).toBe("EMAIL_REQUIRED");
     const inv = await w.pm.post(`/landlords/${w.landlord.id}/invite`).expect(201);
     await accept(inv.body.link);
-    await w.pm.post(`/landlords/${w.landlord.id}/invite`).expect(409);
+    // Another landlord record with the same email cannot take over the login.
+    const twin = (await w.pm.post("/landlords").send({ name: "Twin", email: w.landlord.email }).expect(201)).body.landlord;
+    expect((await w.pm.post(`/landlords/${twin.id}/invite`).expect(409)).body.code).toBe("EMAIL_IN_USE");
+  });
+
+  it("a new invitation for the same person resets a forgotten password and signs them out elsewhere", async () => {
+    const w = await world();
+    const first = await w.pm.post(`/landlords/${w.landlord.id}/invite`).expect(201);
+    const oldSession = await accept(first.body.link);
+    await oldSession.get("/portal/landlord/overview").expect(200);
+    const again = await w.pm.post(`/landlords/${w.landlord.id}/invite`).expect(201);
+    await t.http().post("/auth/accept-invitation").send({ token: tokenFrom(again.body.link), password: "brand-new-password-1" }).expect(200);
+    await oldSession.get("/portal/landlord/overview").expect(401);
+    await t.http().post("/auth/login").send({ email: w.landlord.email, password: "brand-new-password-1" }).expect(200);
+    const logins = await t.db.select().from(users).where(eq(users.role, "LANDLORD"));
+    expect(logins).toHaveLength(1);
   });
 
   it("puts a tenant's repair request in front of the property manager as NEW with an event", async () => {
