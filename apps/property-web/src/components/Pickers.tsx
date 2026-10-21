@@ -219,3 +219,18 @@ export function CustomerPicker({
     </div>
   );
 }
+
+/** Property owners (landlords). Empty means "use the unit's owner" on new leases. */
+export function LandlordSelect({ label, name, defaultValue, emptyLabel }: { label: string; name: string; defaultValue?: string | null; emptyLabel?: string }) {
+  const c = useTranslations("common");
+  const { data } = useApi<{ items: Array<{ id: string; name: string }> }>("/landlords");
+  if (!data) return <SelectField label={label} name={name} options={[{ value: "", label: c("loading") }]} disabled />;
+  return (
+    <SelectField
+      label={label}
+      name={name}
+      defaultValue={defaultValue ?? ""}
+      options={[{ value: "", label: emptyLabel ?? c("none") }, ...data.items.map((l) => ({ value: l.id, label: l.name }))]}
+    />
+  );
+}

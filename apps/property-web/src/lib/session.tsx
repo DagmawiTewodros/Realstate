@@ -76,3 +76,6 @@ export function homeFor(role: SessionUser["role"]): string {
   if (role === "TENANT") return "/portal/tenant";
   return "/staff";
 }
+
+/** Roles that can create and change leases, payments and owners; sales managers can only look. */
+export const RENTAL_WRITERS: SessionUser["role"][] = ["OWNER", "PROPERTY_MANAGER"];

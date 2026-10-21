@@ -45,10 +45,11 @@ Done:
 - Shared packages with unit tests
 - Property API (tasks 02–20) and gym API (tasks 21–25) with integration tests against PostgreSQL
 - Property web: public website, listings, inquiry form, login, staff home, language switch
+- Property staff screens: leads, pipeline, customers, units, projects, import, dashboard, leases (ledger, payments, receipts), arrears
 
 In progress:
 
-- Remaining property staff screens, landlord and tenant portals
+- Remaining property staff screens (owners, repairs, users, messages, settings), landlord and tenant portals
 - Gym web app
 - End-to-end tests at phone width (Playwright)
 - Docker Compose, CI, backups, n8n workflow exports, operations docs
