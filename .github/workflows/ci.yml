@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main, test]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  checks:
+    name: Lint, typecheck and tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      # API tests run against a real PostgreSQL; each suite creates its own database (property_test, gym_test).
+      - run: pnpm test
+      - name: Build everything
+        run: pnpm build
+
+  e2e:
+    name: End-to-end tests at phone width
+    runs-on: ubuntu-latest
+    needs: checks
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-retries 20
+    env:
+      SEED_PASSWORD: e2e-password-123
+      NODE_ENV: development
+      AUTOMATION_MODE: direct
+      SCHEDULER_ENABLED: "false"
+      WEBHOOK_SIGNING_SECRET: e2e-webhook-secret-123
+      INTERNAL_API_SECRET: e2e-internal-secret-123
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages && pnpm --filter @platform/property-api --filter @platform/gym-api build
+      - name: Create, migrate and seed the databases
+        run: |
+          psql -h localhost -U postgres -c "CREATE DATABASE property_e2e" -c "CREATE DATABASE gym_e2e"
+          DATABASE_URL=postgres://postgres@localhost:5432/property_e2e node apps/property-api/dist/migrate.js
+          DATABASE_URL=postgres://postgres@localhost:5432/property_e2e node apps/property-api/dist/seed.js
+          DATABASE_URL=postgres://postgres@localhost:5432/gym_e2e node apps/gym-api/dist/migrate.js
+          DATABASE_URL=postgres://postgres@localhost:5432/gym_e2e node apps/gym-api/dist/seed.js
+      - name: Start the APIs
+        run: |
+          (cd apps/property-api && PORT=4000 DATABASE_URL=postgres://postgres@localhost:5432/property_e2e SESSION_SECRET=e2e-property-session-secret-long-enough \
+            PUBLIC_WEB_URL=http://localhost:3000 STORAGE_DIR=/tmp/property-files nohup node dist/main.js > /tmp/property-api.log 2>&1 &)
+          (cd apps/gym-api && PORT=4001 DATABASE_URL=postgres://postgres@localhost:5432/gym_e2e SESSION_SECRET=e2e-gym-session-secret-long-enough-x \
+            PUBLIC_WEB_URL=http://localhost:3001 STORAGE_DIR=/tmp/gym-files nohup node dist/main.js > /tmp/gym-api.log 2>&1 &)
+      - name: Build and start the web apps
+        run: |
+          PROPERTY_API_URL=http://localhost:4000 pnpm --filter @platform/property-web build
+          GYM_API_URL=http://localhost:4001 pnpm --filter @platform/gym-web build
+          (cd apps/property-web && PROPERTY_API_URL=http://localhost:4000 nohup npx next start -p 3000 > /tmp/property-web.log 2>&1 &)
+          (cd apps/gym-web && GYM_API_URL=http://localhost:4001 nohup npx next start -p 3001 > /tmp/gym-web.log 2>&1 &)
+          for url in http://localhost:4000/health http://localhost:4001/health http://localhost:3000/login http://localhost:3001/login; do
+            for i in $(seq 1 60); do curl -fs "$url" > /dev/null && break; sleep 1; done
+            curl -fs "$url" > /dev/null || (echo "$url did not start" && exit 1)
+          done
+      - run: pnpm --filter @platform/property-web exec playwright install --with-deps chromium
+      - name: Property web end-to-end tests
+        run: pnpm --filter @platform/property-web e2e
+      - name: Gym web end-to-end tests
+        run: pnpm --filter @platform/gym-web e2e
+      - name: Server logs
+        if: failure()
+        run: tail -n 200 /tmp/*.log
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: |
+            apps/*/test-results
+            apps/*/playwright-report
+          retention-days: 7
