@@ -1,12 +1,13 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { Logger } from "@nestjs/common";
-import { configureApp } from "@platform/nest-common";
+import { configureApp, loadDotEnv } from "@platform/nest-common";
 import { AppModule } from "./app.module";
 import { loadGymConfig } from "./config";
 import { runMigrations } from "./migrate";
 
 async function bootstrap(): Promise<void> {
+  loadDotEnv();
   const config = loadGymConfig();
   if (process.env.MIGRATE_ON_START === "true") await runMigrations(config.DATABASE_URL);
   const app = await NestFactory.create(AppModule.register({ config }), { bodyParser: true, bufferLogs: false });

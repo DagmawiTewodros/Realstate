@@ -20,6 +20,8 @@ const env = {
 describe("config", () => {
   it("accepts a complete environment", () => {
     expect(loadConfig(baseConfigSchema, env).PORT).toBe(4000);
+    expect(loadConfig(baseConfigSchema, env).TRUST_PROXY_HOPS).toBe(1);
+    expect(loadConfig(baseConfigSchema, { ...env, TRUST_PROXY_HOPS: "2" }).TRUST_PROXY_HOPS).toBe(2);
   });
   it("refuses to start with a clear message when a variable is missing", () => {
     const { DATABASE_URL: _omit, ...missing } = env;

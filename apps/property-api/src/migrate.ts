@@ -1,6 +1,6 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { join } from "node:path";
-import { createDatabase } from "@platform/nest-common";
+import { createDatabase, loadDotEnv } from "@platform/nest-common";
 
 /** Applies all pending migrations from ./drizzle. Safe to run on every deploy. */
 export async function runMigrations(databaseUrl: string): Promise<void> {
@@ -13,6 +13,7 @@ export async function runMigrations(databaseUrl: string): Promise<void> {
 }
 
 if (require.main === module) {
+  loadDotEnv();
   const url = process.env.DATABASE_URL;
   if (!url) {
     console.error("DATABASE_URL is required");

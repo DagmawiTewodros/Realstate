@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { count, eq } from "drizzle-orm";
-import { createDatabase, users } from "@platform/nest-common";
+import { createDatabase, loadDotEnv, users } from "@platform/nest-common";
 import { buildings, customers, landlords, leads, projects, units } from "./db/schema";
 
 /**
@@ -66,6 +66,7 @@ export async function seed(databaseUrl: string, password: string): Promise<void>
 }
 
 if (require.main === module) {
+  loadDotEnv();
   const url = process.env.DATABASE_URL;
   const password = process.env.SEED_PASSWORD;
   if (!url || !password) {

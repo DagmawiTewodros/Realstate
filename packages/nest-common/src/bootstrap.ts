@@ -9,7 +9,9 @@ import { AlertService } from "./alerts";
 /** Applies the same HTTP setup to both APIs and to tests: cookies, request ids, headers, CORS, errors. */
 export function configureApp(app: INestApplication, config: BaseConfig): void {
   const express = app as NestExpressApplication;
-  express.set("trust proxy", 1);
+  // How many proxies sit in front of the API (the web app's /api proxy, plus any HTTPS proxy before it).
+  // The client address is read that many hops back in X-Forwarded-For, which rate limiting depends on.
+  express.set("trust proxy", config.TRUST_PROXY_HOPS);
   express.disable("x-powered-by");
   app.use(requestIdMiddleware);
   app.use(securityHeadersMiddleware);

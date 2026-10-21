@@ -1,4 +1,14 @@
+import { existsSync } from "node:fs";
 import { z } from "zod";
+
+/**
+ * Development convenience: reads ./.env when it exists and NODE_ENV is not production.
+ * Variables already set in the environment win. Production sets real environment variables instead.
+ */
+export function loadDotEnv(path = ".env"): void {
+  if (process.env.NODE_ENV === "production" || !existsSync(path)) return;
+  process.loadEnvFile(path);
+}
 
 /**
  * Environment variables both APIs need. Each app extends this with its own variables.
@@ -46,6 +56,8 @@ export const baseConfigSchema = z.object({
   ERROR_WEBHOOK_URL: z.string().url().optional().or(z.literal("")),
   ALERT_TELEGRAM_CHAT_ID: z.string().optional().or(z.literal("")),
   COMPANY_NAME: z.string().default("Company"),
+  /** Proxies in front of the API: 1 = web app only (development), 2 = HTTPS proxy + web app (docker-compose). */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
 });
 export type BaseConfig = z.infer<typeof baseConfigSchema>;
 
