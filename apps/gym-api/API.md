@@ -16,6 +16,8 @@ Role groups: DESK = OWNER, GYM_MANAGER, FRONT_DESK. MANAGERS = OWNER, GYM_MANAGE
 | GET | /users | OWNER | none | `{ items }` staff users |
 | POST | /users | OWNER | `{ name, email, role, locale, password }` (not MEMBER) | `{ user }` |
 | PATCH | /users/:id | OWNER | `{ name?, role?, locale?, isActive? }` | `{ user }`; deactivating ends sessions |
+| POST | /users/:id/password | OWNER | `{ password }` | `{ ok }`; temporary password for a staff member, ends their sessions |
+| GET | /members/:id (trainers field) | STAFF | none | the member record now also lists `trainers: [{ trainerId, name }]` |
 | GET | /staff | STAFF | none | `{ items: [{ id, name, role }] }` |
 | GET | /members | DESK | `?q&page&pageSize` | `{ items, page, pageSize, total }` |
 | POST | /members | DESK | memberCreateSchema | `{ member, warnings }` (POSSIBLE_DUPLICATE warnings) |
@@ -83,6 +85,7 @@ Role groups: DESK = OWNER, GYM_MANAGER, FRONT_DESK. MANAGERS = OWNER, GYM_MANAGE
 | GET | /messages | OWNER | `?status&page` | message log |
 | GET | /messages/failed-events | OWNER | none | outbox events that failed |
 | POST | /internal/messages/send | internal secret header | `{ recipient, channel?, templateKey, data, reminderKey? }` | for n8n |
+| POST | /internal/events/messages | internal secret header | `{ id }` of an outbox event | sends that event's standard messages once (n8n mode) |
 | GET, POST | /optout/:token | public | none | `{ valid }` / `{ ok }` |
 | GET | /health, /health/ready | public | none | status |
 

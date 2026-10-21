@@ -16,4 +16,3 @@
 - **Dashboard**: "active members" counts members with a non-cancelled membership covering today (frozen included). Revenue counts VALID payments by `paidAt` in the month; payments not linked to a membership are shown as "Other". Attendance uses ALLOWED check-ins in the last 30 days, Addis time. At-risk excludes members whose membership is frozen today.
 - **Dashboard access**: only OWNER and GYM_MANAGER (front desk uses `/memberships/expiring` instead), so revenue never reaches trainers or front desk.
 - **Scheduler** runs every 15 minutes (first run 10 seconds after start) when `SCHEDULER_ENABLED=true`; every step is idempotent.
-- **bcryptjs** is listed under devDependencies in package.json (copied from property-api); `src/seed.ts` needs it at runtime, which works in development because `@platform/nest-common` depends on it. Move it to dependencies the next time the lockfile is updated.
