@@ -1,0 +1,196 @@
+{
+  "name": "Property: events from the API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "property-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Event from the API",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "14eca3cd-d85c-54b1-bb9d-efb6e0ac01fb",
+      "id": "aae40cb2-d15c-5379-ac26-84ad152b0e22"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verifies the API's signature (HMAC-SHA256 over \"<timestamp>.<body>\") and rejects events older than 5 minutes.\n// Needs NODE_FUNCTION_ALLOW_BUILTIN=crypto and PROPERTY_WEBHOOK_SIGNING_SECRET in the n8n environment.\nconst crypto = require('crypto');\nconst secret = $env.PROPERTY_WEBHOOK_SIGNING_SECRET;\nconst item = $input.first().json;\nconst headers = item.headers || {};\n// The API sends compact JSON, so re-serialising the parsed body gives back the exact signed text.\nconst body = JSON.stringify(item.body);\nconst timestamp = String(headers['x-timestamp'] || '');\nconst signature = String(headers['x-signature'] || '');\nconst expected = 'sha256=' + crypto.createHmac('sha256', secret).update(timestamp + '.' + body).digest('hex');\nconst fresh = Math.abs(Date.now() - Number(timestamp)) < 5 * 60 * 1000;\nconst valid = Boolean(secret) && fresh && signature.length === expected.length &&\n  crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));\nreturn [{ json: { valid, event: item.body } }];"
+      },
+      "name": "Check signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "id": "192a60d7-1786-5832-866f-b6d36423be5a"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "22fbffc8-c02b-5ef6-ac42-0e9ed0535e06",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Signature valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "id": "a8e4d3a1-9816-5338-885b-c42ced98d90b"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PROPERTY_API_URL }}/internal/events/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-internal-secret",
+              "value": "={{ $env.PROPERTY_INTERNAL_API_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ id: $('Check signature').item.json.event.id }) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "name": "Send the standard messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        200
+      ],
+      "notes": "The API sends the usual staff and customer messages for this event (consent, quiet hours and language are handled there). Safe to repeat. Add your own steps (a Telegram group post, a Google Sheet row) between \"Signature valid?\" and this node, switching on {{ $json.event.name }}.",
+      "id": "ce7316cd-db10-5f4e-9b3e-f71d2ce40ce7"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "name": "Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        200
+      ],
+      "id": "429c57fa-56da-5aa6-9efc-49f6ab0ba7dc"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, error: 'invalid signature' }) }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "name": "Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        420
+      ],
+      "id": "53133227-ac4e-524a-b79e-622ed0bf7ffa"
+    }
+  ],
+  "connections": {
+    "Event from the API": {
+      "main": [
+        [
+          {
+            "node": "Check signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check signature": {
+      "main": [
+        [
+          {
+            "node": "Signature valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signature valid?": {
+      "main": [
+        [
+          {
+            "node": "Send the standard messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the standard messages": {
+      "main": [
+        [
+          {
+            "node": "Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "timezone": "Africa/Addis_Ababa"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
