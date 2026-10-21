@@ -26,6 +26,7 @@ export async function signIn(page: Page, email: string) {
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));
   // Signing in applies the account's language; switch back to English for the assertions.
   await useEnglish(page);
+  await page.reload();
 }
 
 /** Error messages shown by the app (Next's empty route announcer also has role=alert, so match the class). */
