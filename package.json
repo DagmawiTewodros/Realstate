@@ -1,0 +1,42 @@
+{
+  "name": "property-and-gym-platform",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Property platform (System A) and gym management (System B) in one pnpm monorepo",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:packages": "pnpm --filter @platform/shared --filter @platform/nest-common build",
+    "dev": "pnpm build:packages && pnpm -r --parallel --filter ./apps/** dev",
+    "lint": "eslint .",
+    "typecheck": "pnpm build:packages && pnpm -r typecheck",
+    "test": "pnpm build:packages && pnpm -r --workspace-concurrency=1 test",
+    "db:migrate": "pnpm --filter @platform/property-api db:migrate && pnpm --filter @platform/gym-api db:migrate",
+    "db:seed": "pnpm --filter @platform/property-api db:seed && pnpm --filter @platform/gym-api db:seed",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@swc/core": "^1.13.0",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.0",
+    "eslint": "^9.39.0",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.40.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild",
+      "sharp",
+      "@nestjs/core"
+    ]
+  }
+}
