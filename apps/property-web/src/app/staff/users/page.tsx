@@ -28,6 +28,7 @@ export default function UsersPage() {
   const { data, error, loading, reload } = useApi<{ items: UserRow[] }>("/users");
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [resetting, setResetting] = useState<UserRow | null>(null);
   const action = useAction();
   const [notice, setNotice] = useState<string | null>(null);
   const roleOptions = STAFF_ROLES.map((r) => ({ value: r, label: e(`ROLE.${r}`) }));
@@ -64,6 +65,16 @@ export default function UsersPage() {
       setEditing(null);
       setNotice(c("saved"));
       await reload();
+    }
+  }
+
+  async function resetPassword(ev: FormEvent<HTMLFormElement>) {
+    ev.preventDefault();
+    if (!resetting) return;
+    const password = String(new FormData(ev.currentTarget).get("password") ?? "");
+    if (await action.run(() => api(`/users/${resetting.id}/password`, { method: "POST", json: { password } }))) {
+      setNotice(t("passwordSet", { name: resetting.name }));
+      setResetting(null);
     }
   }
 
@@ -128,6 +139,22 @@ export default function UsersPage() {
           </form>
         </Card>
       ) : null}
+      {resetting ? (
+        <Card title={t("resetTitle", { name: resetting.name })}>
+          <form className="stack" onSubmit={(ev) => void resetPassword(ev)} noValidate autoComplete="off">
+            <p className="small muted">{t("resetHint")}</p>
+            <TextField label={t("tempPassword")} name="password" type="text" required minLength={10} error={action.fieldErrors.password} />
+            <div className="row">
+              <Button type="submit" disabled={action.busy}>
+                {c("save")}
+              </Button>
+              <Button variant="secondary" onClick={() => setResetting(null)}>
+                {c("cancel")}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      ) : null}
       {error ? <Alert kind="error">{error.message}</Alert> : null}
       {loading && !data ? <Loading label={c("loading")} /> : null}
       {data ? (
@@ -148,6 +175,11 @@ export default function UsersPage() {
                   <button type="button" className="btn secondary small" onClick={() => setEditing(u.id)}>
                     {c("edit")}
                   </button>
+                  {u.id !== me?.id && STAFF_ROLES.includes(u.role as (typeof STAFF_ROLES)[number]) ? (
+                    <button type="button" className="btn secondary small" onClick={() => setResetting(u)}>
+                      {t("resetPassword")}
+                    </button>
+                  ) : null}
                   {u.id !== me?.id ? (
                     <button type="button" className={`btn small ${u.isActive ? "danger" : "secondary"}`} onClick={() => void setActive(u, !u.isActive)}>
                       {u.isActive ? t("deactivate") : t("reactivate")}

@@ -95,7 +95,11 @@
     "inactive": "የቆመ",
     "deactivate": "አቁም",
     "reactivate": "እንደገና አስጀምር",
-    "deactivateConfirm": "{name}ን ላቁም? ከሁሉም ቦታ ይወጣሉ፤ መግባትም አይችሉም።"
+    "deactivateConfirm": "{name}ን ላቁም? ከሁሉም ቦታ ይወጣሉ፤ መግባትም አይችሉም።",
+    "resetPassword": "አዲስ የይለፍ ቃል",
+    "resetTitle": "ለ{name} አዲስ የይለፍ ቃል",
+    "resetHint": "ይህን ጊዜያዊ የይለፍ ቃል በአካል ይስጧቸው፤ በ«የእኔ መለያ» እንዲቀይሩት ይንገሯቸው። አሁን ከሁሉም ቦታ ወጥተዋል።",
+    "passwordSet": "{name} አዲስ የይለፍ ቃል አግኝተዋል፤ ከሁሉም ቦታ ወጥተዋል።"
   },
   "enums": {
     "PAYMENT_METHOD": {

@@ -712,7 +712,11 @@
     "inactive": "Deactivated",
     "deactivate": "Deactivate",
     "reactivate": "Reactivate",
-    "deactivateConfirm": "Deactivate {name}? They are signed out everywhere and cannot sign in."
+    "deactivateConfirm": "Deactivate {name}? They are signed out everywhere and cannot sign in.",
+    "resetPassword": "New password",
+    "resetTitle": "New password for {name}",
+    "resetHint": "Give them this temporary password in person and ask them to change it under My account. They are signed out everywhere now.",
+    "passwordSet": "{name} has a new password and was signed out everywhere."
   },
   "messages": {
     "title": "Messages",
