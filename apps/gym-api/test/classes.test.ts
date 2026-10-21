@@ -140,8 +140,10 @@ describe("Task 24: trainers", () => {
     const a = await memberWithMembership(manager.agent, plan.id);
     const b = await memberWithMembership(manager.agent, plan.id);
     await manager.agent.post("/trainer-assignments").send({ trainerId: trainer.id, memberId: a.member.id }).expect(201);
-    await trainerLogin.agent.get(`/members/${a.member.id}`).expect(200);
+    const detail = await trainerLogin.agent.get(`/members/${a.member.id}`).expect(200);
+    expect(detail.body.trainers).toEqual([{ trainerId: trainer.id, name: trainerLogin.user.name }]);
     await trainerLogin.agent.get(`/members/${b.member.id}`).expect(404);
+    expect((await manager.agent.get(`/members/${b.member.id}`).expect(200)).body.trainers).toEqual([]);
     const mine = await trainerLogin.agent.get("/trainers/me/members").expect(200);
     expect(mine.body.items.map((m: { id: string }) => m.id)).toEqual([a.member.id]);
     const schedule = await trainerLogin.agent.get("/trainers/me/schedule?days=28").expect(200);

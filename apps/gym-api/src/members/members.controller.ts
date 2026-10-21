@@ -7,6 +7,7 @@ import { CurrentUser, Roles, zod, type AuthUser } from "@platform/nest-common";
 import { DESK, ROLE, STAFF } from "../access";
 import { MEMBER_PHOTO_MAX_BYTES, MembersService } from "./members.service";
 import { MembershipsService } from "../memberships/memberships.service";
+import { ClassesService } from "../classes/classes.service";
 
 const listQuery = paginationSchema.extend({ q: z.string().trim().max(100).optional() });
 
@@ -15,6 +16,7 @@ export class MembersController {
   constructor(
     private readonly members: MembersService,
     private readonly memberships: MembershipsService,
+    private readonly classes: ClassesService,
   ) {}
 
   @Get()
@@ -36,7 +38,7 @@ export class MembersController {
     const member = await this.members.getFor(user, id);
     const state = await this.memberships.currentState(id);
     const consent = user.role === ROLE.TRAINER ? undefined : await this.members.consentState(id);
-    return { member, membership: state, consent };
+    return { member, membership: state, consent, trainers: await this.classes.trainersForMember(id) };
   }
 
   @Patch(":id")

@@ -2,10 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, count, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import type { z } from "zod";
 import {
-  addDays,
   addisDateString,
-  addisInstant,
-  parseDateString,
   type classTemplateSchema,
   type classTemplateUpdateSchema,
   type personalSessionSchema,
@@ -28,16 +25,11 @@ import {
 import { bookings, classSessions, classTemplates, members, personalSessions, trainerAssignments, trainers, users } from "../db/schema";
 import { ROLE, isManager } from "../access";
 import { MembershipsService } from "../memberships/memberships.service";
+import { generateClassSessions } from "./generate";
 
 /** Members may cancel up to this many hours before a class starts. */
 export const CANCELLATION_CUTOFF_HOURS = 2;
-/** Sessions are generated this many days ahead. */
-export const SESSION_HORIZON_DAYS = 28;
-
-const weekdayOf = (date: string) => {
-  const { year, month, day } = parseDateString(date);
-  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-};
+export { SESSION_HORIZON_DAYS } from "./generate";
 
 @Injectable()
 export class ClassesService {
@@ -88,6 +80,17 @@ export class ClassesService {
     await this.audit.log({ userId: user.id, action: "trainer.unassigned", entityType: "member", entityId: memberId, metadata: { trainerId } });
   }
 
+  /** Trainers a member is assigned to, for the member page. */
+  async trainersForMember(memberId: string) {
+    return this.db
+      .select({ trainerId: trainers.id, name: users.name })
+      .from(trainerAssignments)
+      .innerJoin(trainers, eq(trainers.id, trainerAssignments.trainerId))
+      .innerJoin(users, eq(users.id, trainers.userId))
+      .where(eq(trainerAssignments.memberId, memberId))
+      .orderBy(asc(users.name));
+  }
+
   async assignedMembers(userId: string) {
     return this.db
       .select({ id: members.id, name: members.name, phone: members.phone })
@@ -133,26 +136,7 @@ export class ClassesService {
    * Running it again creates no duplicates (unique on template and start time).
    */
   async generateSessions(): Promise<number> {
-    const now = this.clock.now();
-    const today = addisDateString(now);
-    const templates = await this.db.select().from(classTemplates).where(eq(classTemplates.isActive, true));
-    let created = 0;
-    for (let i = 0; i < SESSION_HORIZON_DAYS; i += 1) {
-      const date = addDays(today, i);
-      const weekday = weekdayOf(date);
-      for (const t of templates.filter((x) => x.weekday === weekday)) {
-        const [h, m] = t.startTime.split(":").map(Number);
-        const startsAt = addisInstant(date, h, m);
-        if (startsAt.getTime() < now.getTime()) continue;
-        const rows = await this.db
-          .insert(classSessions)
-          .values({ templateId: t.id, trainerId: t.trainerId, name: t.name, startsAt, durationMinutes: t.durationMinutes, capacity: t.capacity })
-          .onConflictDoNothing()
-          .returning({ id: classSessions.id });
-        created += rows.length;
-      }
-    }
-    return created;
+    return generateClassSessions(this.db, this.clock.now());
   }
 
   async listSessions(from: Date, to: Date, trainerUserId?: string) {
