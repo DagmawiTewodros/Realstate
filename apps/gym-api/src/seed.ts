@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
 import { eq, sql } from "drizzle-orm";
-import { addisDateString } from "@platform/shared";
+import { addisDateString, membershipEndDate } from "@platform/shared";
 import { createDatabase, users } from "@platform/nest-common";
-import { members, plans } from "./db/schema";
+import { classTemplates, memberships, members, plans, trainers } from "./db/schema";
+import { generateClassSessions } from "./classes/generate";
 
 /**
- * Seeds one user per gym role, sample plans and sample members. Safe to run twice (skips existing rows).
+ * Seeds one user per gym role, sample plans, sample members (one with an active membership and a member login),
+ * a trainer profile, two weekly classes and their sessions. Safe to run twice (skips existing rows).
  * The password comes from SEED_PASSWORD; it is never stored in the repository.
  */
 async function seed(): Promise<void> {
@@ -45,7 +47,42 @@ async function seed(): Promise<void> {
       const [existing] = await db.select({ id: members.id }).from(members).where(eq(members.phone, m.phone));
       if (!existing) await db.insert(members).values({ ...m, joinedAt: today });
     }
-    console.warn("Gym seed complete");
+    // A member with an active membership and a login for the member app (member@gym.example).
+    const [sara] = await db.select().from(members).where(eq(members.phone, "+251911000102"));
+    if (sara && !sara.email) await db.update(members).set({ email: "member@gym.example" }).where(eq(members.id, sara.id));
+    const [monthly] = await db.select().from(plans).where(eq(plans.name, "Monthly"));
+    if (sara && monthly) {
+      const [hasMembership] = await db.select({ id: memberships.id }).from(memberships).where(eq(memberships.memberId, sara.id));
+      if (!hasMembership) {
+        await db.insert(memberships).values({
+          memberId: sara.id,
+          planId: monthly.id,
+          startDate: today,
+          endDate: membershipEndDate(today, monthly.durationMonths),
+          status: "ACTIVE",
+          priceMinor: 0,
+          complimentaryReason: "Demo data",
+        });
+      }
+      const [login] = await db.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = 'member@gym.example'`);
+      if (!login) await db.insert(users).values({ name: sara.name, email: "member@gym.example", role: "MEMBER", linkedEntityId: sara.id, passwordHash: hash, locale: "en" });
+    }
+
+    // A trainer profile and two weekly classes (weekday 0 = Sunday, Addis Ababa time).
+    const [trainerUser] = await db.select().from(users).where(sql`lower(${users.email}) = 'trainer@gym.example'`);
+    if (trainerUser) {
+      let [trainer] = await db.select().from(trainers).where(eq(trainers.userId, trainerUser.id));
+      if (!trainer) [trainer] = await db.insert(trainers).values({ userId: trainerUser.id, bio: "Strength and conditioning" }).returning();
+      const [anyTemplate] = await db.select({ id: classTemplates.id }).from(classTemplates);
+      if (!anyTemplate) {
+        await db.insert(classTemplates).values([
+          { name: "Morning HIIT", trainerId: trainer.id, weekday: 1, startTime: "07:00", durationMinutes: 45, capacity: 12 },
+          { name: "Evening Strength", trainerId: trainer.id, weekday: 3, startTime: "18:00", durationMinutes: 60, capacity: 10 },
+        ]);
+      }
+      await generateClassSessions(db, new Date());
+    }
+    console.warn("Gym seed complete. Users: owner@gym.example, manager@gym.example, trainer@gym.example, desk@gym.example, member@gym.example");
   } finally {
     await pool.end();
   }
