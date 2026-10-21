@@ -49,6 +49,7 @@ export class LeadsService {
     if (q.status) conditions.push(eq(leads.status, q.status));
     if (q.assignedToId && !isBroker(user)) conditions.push(eq(leads.assignedToId, q.assignedToId));
     if (q.source) conditions.push(eq(leads.source, q.source));
+    if (q.customerId) conditions.push(eq(leads.customerId, q.customerId));
     if (q.overdue) conditions.push(lt(leads.nextStepAt, this.clock.now()), notInArray(leads.status, [...CLOSED_LEAD_STATUSES]));
     if (q.q) {
       const digits = q.q.replace(/\D/g, "");

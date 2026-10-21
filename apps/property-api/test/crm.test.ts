@@ -156,6 +156,19 @@ describe("Task 06: leads", () => {
     expect(res.body.items.map((l: { id: string }) => l.id)).toEqual([past]);
   });
 
+  it("filters the lead list by customer and by overdue=false correctly", async () => {
+    const { b1 } = await setup();
+    const now = t.clock.now().getTime();
+    const a = await b1.agent.post("/leads").send({ source: "PHONE", customer: { name: "A", phone: "0913100001" }, nextStepAt: new Date(now - 3600_000) }).expect(201);
+    await b1.agent.post("/leads").send({ source: "PHONE", customer: { name: "B", phone: "0913100002" } }).expect(201);
+    const byCustomer = await b1.agent.get(`/leads?customerId=${a.body.lead.customerId}`).expect(200);
+    expect(byCustomer.body.items.map((l: { id: string }) => l.id)).toEqual([a.body.lead.id]);
+    const notOverdue = await b1.agent.get("/leads?overdue=false").expect(200);
+    expect(notOverdue.body.total).toBe(2);
+    const overdue = await b1.agent.get("/leads?overdue=true").expect(200);
+    expect(overdue.body.total).toBe(1);
+  });
+
   it("logging a call sets first contact and the next step", async () => {
     const { b1 } = await setup();
     const lead = await b1.agent.post("/leads").send({ source: "PHONE", customer: { name: "O", phone: "0912000004" } }).expect(201);

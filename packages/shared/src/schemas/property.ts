@@ -103,7 +103,8 @@ export const leadListQuerySchema = z.object({
   status: z.enum(LEAD_STATUSES).optional(),
   assignedToId: idSchema.optional(),
   source: z.enum(LEAD_SOURCES).optional(),
-  overdue: z.coerce.boolean().optional(),
+  customerId: idSchema.optional(),
+  overdue: z.enum(["true", "false"]).transform((v) => v === "true").optional(),
   q: z.string().trim().max(100).optional(),
 });
 
