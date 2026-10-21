@@ -90,7 +90,7 @@ describe("csv", () => {
     const csv = toCsv(["Name", "Note"], [["ሰላም", 'He said "hi", ok'], ["=SUM(A1)", null]]);
     expect(csv.startsWith("﻿")).toBe(true);
     expect(csv).toContain('"He said ""hi"", ok"');
-    expect(csv).toContain('"=SUM(A1)"');
+    expect(csv).toContain(`"'=SUM(A1)"`);
   });
 });
 

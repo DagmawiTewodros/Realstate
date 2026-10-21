@@ -3,8 +3,10 @@ import type { Response } from "express";
 /** CSV with a UTF-8 byte order mark, so spreadsheets open Amharic text correctly. */
 export function toCsv(headers: string[], rows: Array<Array<string | number | null | undefined>>): string {
   const escape = (v: string | number | null | undefined) => {
-    const s = v === null || v === undefined ? "" : String(v);
-    return /[",\r\n]/.test(s) || /^[=+\-@]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    let s = v === null || v === undefined ? "" : String(v);
+    // Text starting with a formula character is prefixed with an apostrophe, so spreadsheets show it as text (OWASP CSV injection).
+    if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    return /[",\r\n']/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [headers, ...rows].map((r) => r.map(escape).join(","));
   return `\uFEFF${lines.join("\r\n")}\r\n`;
