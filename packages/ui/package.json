@@ -1,0 +1,22 @@
+{
+  "name": "@platform/ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared React components and styles for both web apps (consumed as source via transpilePackages)",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"ui: covered by the web apps' tests\""
+  },
+  "dependencies": {
+    "@platform/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "react": "^19.1.0"
+  }
+}
