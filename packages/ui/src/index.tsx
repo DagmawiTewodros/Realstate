@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useEffect, useId, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { formatDate, formatDateTime, formatMoney, type Locale } from "@platform/shared";
 
-let fieldCounter = 0;
+/** Stable across server and client rendering, so labels stay linked to their inputs after hydration. */
 function useFieldId(id?: string) {
-  const [generated] = useState(() => `f${++fieldCounter}`);
+  const generated = useId();
   return id ?? generated;
 }
 

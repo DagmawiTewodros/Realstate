@@ -31,13 +31,15 @@ export default function MyDayPage() {
   const locale = useLocale() as "am" | "en";
   const router = useRouter();
   const { user } = useSession();
-  const overdue = useApi<{ items: LeadRow[] }>("/leads/overdue");
-  const open = useApi<{ items: LeadRow[] }>("/leads?pageSize=200");
+  // Owners and property managers start on the dashboard; only sales staff load leads here.
+  const sales = user?.role === "SALES_MANAGER" || user?.role === "BROKER";
+  const overdue = useApi<{ items: LeadRow[] }>(sales ? "/leads/overdue" : null);
+  const open = useApi<{ items: LeadRow[] }>(sales ? "/leads?pageSize=200" : null);
   const [logging, setLogging] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && (user.role === "OWNER" || user.role === "PROPERTY_MANAGER")) router.replace("/staff/dashboard");
-  }, [user, router]);
+    if (user && !sales) router.replace("/staff/dashboard");
+  }, [user, sales, router]);
 
   const today = useMemo(() => {
     const todayStr = addisDateString(new Date());
